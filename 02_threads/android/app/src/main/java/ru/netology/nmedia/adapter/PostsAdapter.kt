@@ -6,9 +6,13 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+
+
+private const val AVATARS_URL_PREFIX = "http://10.0.2.2:9999/avatars/"
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -47,6 +51,15 @@ class PostViewHolder(
             // в адаптере
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
+
+            val url = AVATARS_URL_PREFIX + post.authorAvatar
+
+            Glide.with(binding.root.context)
+                .load(url)
+                .placeholder(R.drawable.placeholder)
+                .circleCrop()
+                .timeout(10_000)
+                .into(binding.avatar)
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
