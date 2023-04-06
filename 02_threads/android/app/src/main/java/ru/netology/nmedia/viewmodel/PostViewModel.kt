@@ -1,15 +1,14 @@
 package ru.netology.nmedia.viewmodel
 
+import android.app.AlertDialog
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.*
+import ru.netology.nmedia.activity.FeedFragment
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
-import java.io.IOException
-import kotlin.concurrent.thread
-import kotlin.math.log
 
 private val empty = Post(
     id = 0,
@@ -31,6 +30,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
+    private val _showDialogEvent = SingleLiveEvent<Unit>()
+    val showDialogEvent: LiveData<Unit>
+        get() = _showDialogEvent
 
     init {
         loadPosts()
@@ -45,6 +47,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
             override fun onError(e: Exception) {
                 _data.postValue(FeedModel(error = true))
+                _showDialogEvent.value = Unit
             }
         })
     }
@@ -92,6 +95,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
                 override fun onError(e: Exception) {
                     _data.postValue(FeedModel(error = true))
+                    _showDialogEvent.value = Unit
                     Log.e("TAG_LIKE", "onError: ${e.message}")
                     e.printStackTrace()
                 }
@@ -106,6 +110,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
                 override fun onError(e: Exception) {
                     _data.postValue(FeedModel(error = true))
+                    _showDialogEvent.value = Unit
                 }
 
             })
@@ -118,15 +123,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeById(id: Long) {
         val old = _data.value?.posts.orEmpty()
-        repository.removeByIdAsync(id, object : PostRepository.Callback<Boolean>{
-            override fun onSuccess(posts: Boolean) {
-               if (posts){
-                   val posts = _data.value?.posts.orEmpty()
-                       .filter { it.id != id }
-                       _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
-               } else{
-                   throw RuntimeException("Failed to remove the post (it = $id)")
-               }
+        repository.removeByIdAsync(id, object : PostRepository.Callback<Unit>{
+            override fun onSuccess(posts: Unit) {
+               val posts = old.filter { it.id != id }
+                _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
             }
 
             override fun onError(e: Exception) {

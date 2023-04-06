@@ -1,13 +1,16 @@
 package ru.netology.nmedia.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
@@ -73,6 +76,24 @@ class FeedFragment : Fragment() {
             viewModel.loadPosts()
         }
 
+        viewModel.showDialogEvent.observe(viewLifecycleOwner, Observer<Unit> {
+            showErrorDialog()
+        })
+
         return binding.root
+    }
+
+    private fun showErrorDialog() {
+        val alertDialogBuilder = AlertDialog.Builder(context)
+        alertDialogBuilder.setTitle(R.string.error)
+        alertDialogBuilder.setMessage(R.string.failed_request)
+        alertDialogBuilder.setPositiveButton(R.string.yes) { _, _ ->
+            viewModel.loadPosts()
+        }
+        alertDialogBuilder.setNegativeButton(R.string.no) { _, _ ->
+            Toast.makeText(context, R.string.repeat_request, Toast.LENGTH_SHORT).show()
+        }
+        val alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
     }
 }
