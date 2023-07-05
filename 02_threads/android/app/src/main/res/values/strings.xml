@@ -27,4 +27,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="repeat_request">You refused to repeat the request</string>
+    <string name="loading" translatable="false">Loading</string>
+    <string name="close_app" translatable="false">Close App</string>
+    <string name="wait" translatable="false">Wait</string>
 </resources>
